@@ -51,6 +51,9 @@ function V3App() {
     })
       .then(() => {
           onLoadAll();
+          setEditTaskId(null);
+          setTitle('');
+          setDescription('');
         }
       ).catch((err) => {
       console.log(err);
@@ -95,6 +98,12 @@ function V3App() {
     );
   };
 
+  const onCancel = () => {
+    setEditTaskId(null);
+    setTitle('');
+    setDescription('');
+  }
+
   // create and edit form
   const taskForm = () => <Box
     component="form"
@@ -121,12 +130,13 @@ function V3App() {
       onChange={(e) => setDescription(e.target.value)}
     />
 
-    <Button variant="outlined"
-            size={'large'}
-            onClick={() => setEditTaskId(null)}>Cancel</Button>
-
     {editTaskId
-      ? <Button variant="contained" onClick={onUpdate}>Update</Button>
+      ? <>
+        <Button variant="outlined"
+                size={'large'}
+                onClick={onCancel}>Cancel</Button>
+        <Button variant="contained" onClick={onUpdate}>Update</Button>
+      </>
       : <Button variant="contained" onClick={onCreate}>Create</Button>
     }
 
@@ -156,68 +166,27 @@ function V3App() {
       field: 'actions',
       flex: 0.2,
       renderCell: ({ row }) => <>
-        ({row.id}) <strong>{row.title}</strong>{' '}<span>{row.description}</span>
         <Button variant="outlined" color="error"
-                onClick={() => onDelete(row.id)}>Delete</Button>
-        <Button variant="outlined"
-                onClick={() => onEdit(row)}>Edit
-        </Button>
+                onClick={() => onDelete(row.id)}
+                sx={{ marginRight: 2 }}
+        >Delete</Button>
+        <Button variant="outlined" onClick={() => onEdit(row)}>Edit</Button>
       </>,
     },
-
-    // {
-    //   headerName: 'Size',
-    //   field: 'size',
-    // },
-    // {
-    //   headerName: 'Action',
-    //   field: 'action',
-    //   width: 80,
-    //   renderCell: ({ row }: GridRenderCellParams) => <ActionMenu row={row} queryParams={queryParams} />,
-    // },
   ];
 
 
   return (
     <Container fixed>
-      <h1>V3</h1>
+      <h1>V3 {isLoading && <>Loading...</>}</h1>
+
+      <RegularTable rows={tasks} columns={columns}
+                    getRowId={(row) => row.id} />
 
 
-      {isLoading
-        ? <div>Loading...</div>
-        : <>
+      {editTaskId ? <h4>Edit Task</h4> : <h4>Create Task</h4>}
 
-          <RegularTable rows={tasks} columns={columns}
-                        getRowId={(row) => row.id} />
-
-
-          <ul>
-            {tasks.map((task) => (
-
-              <li key={task.id}>
-                {editTaskId === task.id
-                  ? taskForm()
-                  :
-                  <>
-                    ({task.id}) <strong>{task.title}</strong>{' '}<span>{task.description}</span>
-                    <Button variant="outlined" color="error"
-                            onClick={() => onDelete(task.id)}>Delete</Button>
-                    <Button variant="outlined"
-                            onClick={() => onEdit(task)}>Edit
-                    </Button>
-                  </>
-                }
-              </li>
-            ))}
-
-          </ul>
-
-          <hr />
-          <h4>Create task</h4>
-          {taskForm()}
-        </>
-      }
-
+      {taskForm()}
 
     </Container>
   );
